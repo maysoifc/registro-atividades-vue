@@ -1,4 +1,5 @@
 <script setup>
+import { ref, computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import AppHeader from '@/components/layout/AppHeader.vue';
 import RecordCard from '@/components/records/RecordCard.vue';
@@ -6,6 +7,22 @@ import { useRecords } from '@/composables/useRecords';
 
 const router = useRouter();
 const { records } = useRecords();
+
+// Campo de busca reativo
+const searchQuery = ref('');
+
+// Ordena por data (mais recente primeiro) e filtra pelo texto digitado na busca
+const filteredRecords = computed(() => {
+  const sorted = [...records.value].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  if (!searchQuery.value) return sorted;
+
+  return sorted.filter((r) =>
+    r.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
 
 function formatDate(isoDate) {
   return new Date(isoDate).toLocaleDateString('pt-BR');
@@ -17,9 +34,19 @@ function formatDate(isoDate) {
     <AppHeader title="Meus Registros" show-back @back="router.push('/')" />
 
     <div class="page">
-      <div v-if="records.length > 0" class="list">
+      <!-- Input de Busca -->
+      <div class="search-container">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Buscar registros..."
+          class="search-input"
+        />
+      </div>
+
+      <div v-if="filteredRecords.length > 0" class="list">
         <RouterLink
-          v-for="record in records"
+          v-for="record in filteredRecords"
           :key="record.id"
           :to="`/records/${record.id}`"
           class="link"
@@ -34,7 +61,7 @@ function formatDate(isoDate) {
 
       <div v-else class="empty">
         <p>📭</p>
-        <p>Nenhum registro ainda</p>
+        <p>Nenhum registro encontrado</p>
         <RouterLink to="/records/new/edit" class="btn">
           Criar primeiro registro
         </RouterLink>
@@ -46,6 +73,25 @@ function formatDate(isoDate) {
 </template>
 
 <style scoped>
+.search-container {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: white;
+}
+
+.search-input:focus {
+  border-color: #0b5cff;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -94,6 +140,7 @@ function formatDate(isoDate) {
   text-decoration: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
+  z-index: 10;
 }
 
 .fab:active {

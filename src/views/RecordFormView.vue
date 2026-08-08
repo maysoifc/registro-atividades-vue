@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { z } from 'zod';
 import AppHeader from '@/components/layout/AppHeader.vue';
 import AppInput from '@/components/forms/AppInput.vue';
 import AppButton from '@/components/forms/AppButton.vue';
@@ -12,10 +13,22 @@ const { addRecord, getRecord, updateRecord } = useRecords();
 
 const isEditMode = computed(() => route.params.id !== 'new');
 
+const categories = ['Estudo', 'Trabalho', 'Exercício', 'Lazer'];
+
 const form = ref({
   title: '',
   duration: '',
   notes: '',
+  category: 'Estudo',
+});
+
+// Mensagem de erro para exibir na tela se a validação falhar
+const errorMessage = ref('');
+
+// Schema de validação com Zod
+const schema = z.object({
+  title: z.string().min(3, 'O título deve ter no mínimo 3 caracteres'),
+  duration: z.number({ invalid_type_error: 'A duração deve ser um número' }).min(1, 'A duração deve ser positiva'),
 });
 
 onMounted(() => {
@@ -26,6 +39,7 @@ onMounted(() => {
         title: record.title,
         duration: record.duration,
         notes: record.notes || '',
+        category: record.category || 'Estudo',
       };
     } else {
       router.push('/records');
@@ -34,18 +48,27 @@ onMounted(() => {
 });
 
 function handleSubmit() {
-  if (!form.value.title || !form.value.duration) {
-    alert('Preencha os campos obrigatórios');
-    return;
-  }
+  errorMessage.value = '';
 
-  if (isEditMode.value) {
-    updateRecord(route.params.id, form.value);
-  } else {
-    addRecord(form.value);
-  }
+  try {
+    // Valida os dados do formulário usando o Zod
+    schema.parse(form.value);
 
-  router.push('/records');
+    if (isEditMode.value) {
+      updateRecord(route.params.id, form.value);
+    } else {
+      addRecord(form.value);
+    }
+
+    router.push('/records');
+  } catch (error) {
+    // Se der erro, pega a mensagem do Zod e mostra para o usuário
+    if (error instanceof z.ZodError) {
+      errorMessage.value = error.errors[0].message;
+    } else {
+      errorMessage.value = 'Ocorreu um erro de validação.';
+    }
+  }
 }
 </script>
 
@@ -59,6 +82,11 @@ function handleSubmit() {
 
     <div class="page">
       <form @submit.prevent="handleSubmit" class="form">
+        <!-- Alerta de Erro de Validação -->
+        <div v-if="errorMessage" class="error-banner">
+          {{ errorMessage }}
+        </div>
+
         <AppInput
           v-model="form.title"
           label="Título"
@@ -73,6 +101,15 @@ function handleSubmit() {
           placeholder="Ex: 60"
           required
         />
+
+        <div class="select-group">
+          <label class="label">Categoria</label>
+          <select v-model="form.category" class="select-field">
+            <option v-for="cat in categories" :key="cat" :value="cat">
+              {{ cat }}
+            </option>
+          </select>
+        </div>
 
         <div class="textarea-group">
           <label class="label">Observações</label>
@@ -99,6 +136,18 @@ function handleSubmit() {
   border-radius: 12px;
 }
 
+.error-banner {
+  background-color: #ffe6e6;
+  color: #d9534f;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #f5c6cb;
+}
+
+.select-group,
 .textarea-group {
   margin-bottom: 16px;
 }
@@ -109,6 +158,22 @@ function handleSubmit() {
   font-size: 14px;
   font-weight: 500;
   color: #333;
+}
+
+.select-field {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.select-field:focus {
+  outline: none;
+  border-color: #0b5cff;
 }
 
 .textarea {
