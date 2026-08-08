@@ -21,6 +21,12 @@ const routes = [
     name: 'record-edit',
     component: () => import('@/views/RecordFormView.vue'),
   },
+  // Nova rota para a tela de gráficos e estatísticas
+  {
+    path: '/stats',
+    name: 'stats',
+    component: () => import('@/views/StatsView.vue'),
+  },
 ];
 
 const router = createRouter({

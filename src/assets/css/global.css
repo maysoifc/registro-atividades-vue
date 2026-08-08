@@ -14,6 +14,7 @@ body {
   background: #f4f4f6;
   color: #111;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 #app {
@@ -26,3 +27,23 @@ body {
   max-width: 600px;
   margin: 0 auto;
 }
+
+/* Suporte automático ao Dark Mode do sistema operacional */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #121212;
+    color: #f0f0f0;
+  }
+}
+
+/* MODO ESCURO MANUAL: Deixa o fundo da página inteira e o app escuros */
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #f0f0f0 !important;
+}
+
+html.dark-mode, body.dark-mode #app {
+  background-color: #121212 !important;
+  color: #f0f0f0 !important;
+}
+

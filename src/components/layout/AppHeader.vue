@@ -1,4 +1,7 @@
 <script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
 defineProps({
   title: {
     type: String,
@@ -8,13 +11,44 @@ defineProps({
 });
 
 defineEmits(['back']);
+
+const router = useRouter();
+const darkMode = ref(false);
+
+onMounted(() => {
+  // Verifica se o modo escuro já está ativo ao carregar
+  darkMode.value = document.body.classList.contains('dark-mode');
+});
+
+function toggleDarkMode() {
+  darkMode.value = !darkMode.value;
+  
+  if (darkMode.value) {
+    document.body.classList.add('dark-mode');
+    document.body.style.backgroundColor = '#121212';
+    document.body.style.color = '#f0f0f0';
+  } else {
+    document.body.classList.remove('dark-mode');
+    document.body.style.backgroundColor = '#f4f4f6';
+    document.body.style.color = '#111';
+  }
+}
 </script>
 
 <template>
   <header class="app-header">
     <button v-if="showBack" @click="$emit('back')" class="btn-back">←</button>
     <h1>{{ title }}</h1>
-    <div class="spacer"></div>
+    
+    <!-- Botão para abrir a tela de Gráficos/Estatísticas -->
+    <button @click="router.push('/stats')" class="btn-theme" title="Ver Estatísticas">
+      📊
+    </button>
+
+    <!-- Botão de Dark Mode -->
+    <button @click="toggleDarkMode" class="btn-theme" :title="darkMode ? 'Mudar para modo claro' : 'Mudar para modo escuro'">
+      {{ darkMode ? '☀️' : '🌙' }}
+    </button>
   </header>
 </template>
 
@@ -44,13 +78,26 @@ defineEmits(['back']);
   margin-right: 8px;
 }
 
+.btn-theme {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-theme:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .app-header h1 {
   font-size: 18px;
   font-weight: 600;
   flex: 1;
-}
-
-.spacer {
-  width: 40px; /* Espaço para balancear o botão de voltar */
 }
 </style>
