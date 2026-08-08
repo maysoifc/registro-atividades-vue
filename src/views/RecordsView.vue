@@ -44,20 +44,18 @@ function formatDate(isoDate) {
         />
       </div>
 
-      <div v-if="filteredRecords.length > 0" class="list">
-        <RouterLink
-          v-for="record in filteredRecords"
-          :key="record.id"
-          :to="`/records/${record.id}`"
-          class="link"
-        >
-          <RecordCard
-            :title="record.title"
-            :duration="record.duration"
-            :date="formatDate(record.createdAt)"
-          />
-        </RouterLink>
-      </div>
+      <!-- Lista com transição corrigida para envolver cada item corretamente -->
+      <TransitionGroup v-if="filteredRecords.length > 0" name="list" tag="div" class="list">
+        <div v-for="record in filteredRecords" :key="record.id">
+          <RouterLink :to="`/records/${record.id}`" class="link">
+            <RecordCard
+              :title="record.title"
+              :duration="record.duration"
+              :date="formatDate(record.createdAt)"
+            />
+          </RouterLink>
+        </div>
+      </TransitionGroup>
 
       <div v-else class="empty">
         <p>📭</p>
@@ -100,6 +98,22 @@ function formatDate(isoDate) {
 
 .link {
   text-decoration: none;
+}
+
+/* Animações de transição da lista */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }
 
 .empty {
@@ -146,4 +160,5 @@ function formatDate(isoDate) {
 .fab:active {
   transform: scale(0.9);
 }
+
 </style>
