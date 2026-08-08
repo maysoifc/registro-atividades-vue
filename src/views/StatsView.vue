@@ -8,23 +8,23 @@ import {
   Legend,
   BarElement,
   CategoryScale,
-  LinearScale
+  LinearScale,
 } from 'chart.js';
 import AppHeader from '@/components/layout/AppHeader.vue';
-import { useRecords } from '@/composables/useRecords';
+import { useRecordsStore } from '@/stores/records';
 
-// Registra localmente caso prefira (ou use o registro global no main.js)
+// Registra os componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const { records } = useRecords();
+const store = useRecordsStore();
 
-// Prepara os dados dinâmicos baseados nos seus registros salvos
+// Prepara os dados dinâmicos baseados nos registros salvos no Pinia
 const chartData = computed(() => ({
-  labels: records.value.map((r) => r.title),
+  labels: store.records.map((r) => r.title),
   datasets: [
     {
       label: 'Duração (minutos)',
-      data: records.value.map((r) => r.duration),
+      data: store.records.map((r) => r.duration),
       backgroundColor: '#0b5cff',
       borderRadius: 6,
     },
@@ -45,11 +45,12 @@ const chartOptions = {
       <div class="card chart-container">
         <h2 class="chart-title">Duração por Atividade</h2>
         
-        <div v-if="records.length > 0" class="wrapper">
+        <div v-if="store.records.length > 0" class="wrapper">
           <Bar :data="chartData" :options="chartOptions" />
         </div>
         
         <div v-else class="empty">
+          <p>📭</p>
           <p>Nenhum dado cadastrado para exibir no gráfico.</p>
         </div>
       </div>
@@ -79,5 +80,10 @@ const chartOptions = {
   text-align: center;
   padding: 40px;
   color: #888;
+}
+
+.empty p:first-child {
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 </style>

@@ -3,17 +3,17 @@ import { ref, computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import AppHeader from '@/components/layout/AppHeader.vue';
 import RecordCard from '@/components/records/RecordCard.vue';
-import { useRecords } from '@/composables/useRecords';
+import { useRecordsStore } from '@/stores/records';
 
 const router = useRouter();
-const { records } = useRecords();
+const store = useRecordsStore();
 
 // Campo de busca reativo
 const searchQuery = ref('');
 
 // Ordena por data (mais recente primeiro) e filtra pelo texto digitado na busca
 const filteredRecords = computed(() => {
-  const sorted = [...records.value].sort(
+  const sorted = [...store.records].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
 
@@ -116,6 +116,10 @@ function formatDate(isoDate) {
   transform: translateX(30px);
 }
 
+.list-move {
+  transition: transform 0.3s ease;
+}
+
 .empty {
   text-align: center;
   padding: 60px 20px;
@@ -160,5 +164,4 @@ function formatDate(isoDate) {
 .fab:active {
   transform: scale(0.9);
 }
-
 </style>

@@ -1,9 +1,19 @@
 <script setup>
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import AppHeader from '@/components/layout/AppHeader.vue';
-import { useRecords } from '@/composables/useRecords';
+import { useRecordsStore } from '@/stores/records';
 
-const { totalRecords, totalDuration } = useRecords();
+// Usa a store do Pinia em vez do composable antigo
+const store = useRecordsStore();
+
+// Calcula a quantidade total de registros
+const totalRecords = computed(() => store.records.length);
+
+// Calcula a soma total dos minutos de todos os registros
+const totalDuration = computed(() => {
+  return store.records.reduce((acc, curr) => acc + Number(curr.duration || 0), 0);
+});
 </script>
 
 <template>

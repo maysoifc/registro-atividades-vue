@@ -3,16 +3,16 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import AppHeader from '@/components/layout/AppHeader.vue';
 import AppButton from '@/components/forms/AppButton.vue';
-import { useRecords } from '@/composables/useRecords';
+import { useRecordsStore } from '@/stores/records';
 
 const router = useRouter();
 const route = useRoute();
-const { getRecord, deleteRecord } = useRecords();
+const store = useRecordsStore();
 
 const record = ref(null);
 
 onMounted(() => {
-  record.value = getRecord(route.params.id);
+  record.value = store.getRecord(route.params.id);
   if (!record.value) {
     router.push('/records');
   }
@@ -32,7 +32,7 @@ function handleEdit() {
 
 function handleDelete() {
   if (confirm('Deseja realmente excluir este registro?')) {
-    deleteRecord(route.params.id);
+    store.deleteRecord(route.params.id);
     router.push('/records');
   }
 }

@@ -5,11 +5,11 @@ import { z } from 'zod';
 import AppHeader from '@/components/layout/AppHeader.vue';
 import AppInput from '@/components/forms/AppInput.vue';
 import AppButton from '@/components/forms/AppButton.vue';
-import { useRecords } from '@/composables/useRecords';
+import { useRecordsStore } from '@/stores/records';
 
 const router = useRouter();
 const route = useRoute();
-const { addRecord, getRecord, updateRecord } = useRecords();
+const store = useRecordsStore();
 
 const isEditMode = computed(() => route.params.id !== 'new');
 
@@ -33,7 +33,7 @@ const schema = z.object({
 
 onMounted(() => {
   if (isEditMode.value) {
-    const record = getRecord(route.params.id);
+    const record = store.getRecord(route.params.id);
     if (record) {
       form.value = {
         title: record.title,
@@ -55,9 +55,9 @@ function handleSubmit() {
     schema.parse(form.value);
 
     if (isEditMode.value) {
-      updateRecord(route.params.id, form.value);
+      store.updateRecord(route.params.id, form.value);
     } else {
-      addRecord(form.value);
+      store.addRecord(form.value);
     }
 
     router.push('/records');
